@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+							http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+							http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+							http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd ">
+
+    <!--读配置文件-->
+    <context:property-placeholder location="classpath:db.properties"></context:property-placeholder>
+
+    <!--datasource-->
+    <bean class="com.mchange.v2.c3p0.ComboPooledDataSource" name="dataSource">
+        <property name="jdbcUrl" value="${jdbc.url}"></property>
+        <property name="driverClass" value="${jdbc.driver}"></property>
+        <property name="user" value="${jdbc.user}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+    </bean>
+
+    <!--sqlsessionFactory-->
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" name="sqlSessionFactory">
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="configLocation" value="classpath:sqlMapConfig.xml"></property>
+    </bean>
+
+    <!--mapper(dao) 通过工厂来生成-->
+    <!--<bean class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="com.whc.sm.mapper.UserMapper"></property>
+        <property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+    </bean>-->
+    <!--
+    批量扫描mapper,从mapper的包中，扫描Mapper接口。并自动创建Mapper代理对象
+    并注册到spring容器中
+    扫描出mapper的bean name mapper接口名称（首字母小写）
+    -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+        <!--如果需要多个包  包名直接用英文逗号隔开-->
+        <property name="basePackage" value="com.whc.mapper"></property>
+    </bean>
+
+    <!--事务管理 ??-->
+    <bean class="org.springframework.jdbc.core.JdbcTemplate" name="jdbcTemplate">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <!--service对象由spring来创建  利用注释-->
+    <context:component-scan base-package="com.whc.service"></context:component-scan>
+
+</beans>
